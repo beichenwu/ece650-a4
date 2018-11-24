@@ -50,7 +50,7 @@ vector<string> String_Split(string String_Input, string Deliminator){           
     return Splited_String;
 }
 
-vector<vector<int> > Read_Edge_list(string User_Input, vector<vector<int> > VerticesVector){                  //Define an function to analyze the user input and return array of edge
+vector<vector<int> > Read_Edge_list(string User_Input, vector<vector<int> > VerticesVector, int& error){                  //Define an function to analyze the user input and return array of edge
     int String_Index1;
     int String_Index2;                                                                                      //a variable to find where the space from the input
     int Edge_Number;                                                                                        //a variable to store the number of edge
@@ -74,6 +74,7 @@ vector<vector<int> > Read_Edge_list(string User_Input, vector<vector<int> > Vert
     }
     for(int i = 0; i < Edge_List.size(); i++){                                                             //Error Check
         if(Edge_List[i][0]> (Node_Length-1) || Edge_List[i][1]> (Node_Length-1) ){
+            error = error + 1;
             cerr << "Error: Edge List contains nodes beyond the node list" << endl;
             break;
         }
@@ -98,34 +99,35 @@ int main() {
             VerticesVector = Create_Node_list(Number_Of_Vertices, Edge_List);                     //Create the node list
 
         } else if (User_Input.substr(0, 1) == "E") {                    //For the case the user input edge set
+            int Error = 0;
             Out_Put_Mini = "";
-            Edge_List = Read_Edge_list(User_Input, VerticesVector);
+            Edge_List = Read_Edge_list(User_Input, VerticesVector, Error);
             int number = VerticesVector.size();
             //Solver
-            for(int k = 0; k < number; k++){
-                try {
-                    Solver s(number, k, Edge_List);
-                    if (s.solve()) {
-                        auto solution = s.get_solution();
-                        string tmp_out;
-                        for (int i = 0; i < solution.size(); i++){
-                            if(solution[i] == 1){
-                                tmp_out += to_string(i) + " ";
+            if (Error == 0){
+                for(int k = 0; k < number; k++){
+                    try {
+                        Solver s(number, k, Edge_List);
+                        if (s.solve()) {
+                            auto solution = s.get_solution();
+                            string tmp_out;
+                            for (int i = 0; i < solution.size(); i++){
+                                if(solution[i] == 1){
+                                    tmp_out += to_string(i) + " ";
+                                }
                             }
+                            tmp_out.pop_back();
+                            cout<<tmp_out<<endl;
+                            break;
                         }
-                        tmp_out.pop_back();
-                        cout<<tmp_out<<endl;
-                        break;
+                    } catch(std::exception const& ex) {
+                        std::clog << "Failed parsing because: " << ex.what() << std::endl;
+                        return 1;
                     }
-                } catch(std::exception const& ex) {
-                    std::clog << "Failed parsing because: " << ex.what() << std::endl;
-                    return 1;
                 }
             }
-
         }
     }
-
     return 0;
 
 
